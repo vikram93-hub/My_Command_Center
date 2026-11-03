@@ -171,10 +171,10 @@ export default function CloudSyncGate({ children }: Props) {
     return () => { cancelled = true; };
   }, [user]);
 
-  async function saveWorkspace(data: WorkspaceData) {
+  async function saveWorkspace(data: WorkspaceData): Promise<boolean> {
     const client = supabase.current;
     const currentUser = userRef.current;
-    if (!client || !currentUser) return;
+    if (!client || !currentUser) return false;
     setSyncStatus("Syncing");
     const { data: saved, error: saveError } = await client
       .from(TABLE)
@@ -185,11 +185,12 @@ export default function CloudSyncGate({ children }: Props) {
     if (saveError) {
       setSyncStatus("Sync error");
       setError("Cloud save failed: " + saveError.message);
-      return;
+      return false;
     }
     lastUpdated.current = saved?.updated_at ?? new Date().toISOString();
     setSyncStatus("Synced");
     setError("");
+    return true;
   }
 
   async function migrateCurrentBrowser() {
@@ -198,8 +199,8 @@ export default function CloudSyncGate({ children }: Props) {
       setError("No saved dashboard data was found in this browser. Import your JSON backup instead.");
       return;
     }
-    await saveWorkspace(data);
-    if (!error) {
+    const saved = await saveWorkspace(data);
+    if (saved) {
       setMigrationNeeded(false);
       setSyncReady(true);
       setMessage("Your existing browser data is now backed up to your account.");
@@ -228,8 +229,9 @@ export default function CloudSyncGate({ children }: Props) {
       const merged = { ...existing, ...allowed };
       suppressSync.current = true;
       writeLocalWorkspace(merged);
-      await saveWorkspace(merged);
+      const saved = await saveWorkspace(merged);
       suppressSync.current = false;
+      if (!saved) return;
       setMigrationNeeded(false);
       setSyncReady(true);
       setMessage("Backup imported and synced. Your dashboard is ready.");
