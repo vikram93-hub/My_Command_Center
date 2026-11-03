@@ -1,4 +1,6 @@
 "use client";
+import CloudSyncGate from "@/components/cloud-sync-gate";
+
 import { useEffect, useState, type FormEvent } from "react";
 import {
   Activity,
@@ -155,7 +157,7 @@ type RoadmapStep = { id: string; title: string; done: boolean };
 type Roadmap = { id: string; title: string; description: string; category: string; targetDate: string; steps: RoadmapStep[]; createdAt: string };
 const emptyRoadmapForm = { title: "", description: "", category: "Software Engineering", targetDate: "", stepsText: "" };
 
-export default function Home() {
+function Dashboard() {
   const [referenceDate, setReferenceDate] = useState<Date | null>(null);
   const [tasks, setTasks] = useState(initialTasks);
   const [tasksLoaded, setTasksLoaded] = useState(false);
@@ -1895,3 +1897,8 @@ export default function Home() {
     </main>
   );
 }
+
+export default function Home() {
+  return <CloudSyncGate><Dashboard /></CloudSyncGate>;
+}
+
