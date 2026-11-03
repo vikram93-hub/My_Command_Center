@@ -103,7 +103,7 @@ export default function CloudSyncGate({ children }: Props) {
   const [backupFile, setBackupFile] = useState<File | null>(null);
   const lastUpdated = useRef<string | null>(null);
   const suppressSync = useRef(false);
-  const pendingSync = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSync = useRef<number | null>(null);
   const userRef = useRef<User | null>(null);
 
   useEffect(() => {
@@ -135,12 +135,13 @@ export default function CloudSyncGate({ children }: Props) {
   useEffect(() => {
     const client = supabase.current;
     if (!client || !user) return;
+    const activeClient = client;
     let cancelled = false;
     setLoading(true);
     setSyncStatus("Loading cloud workspace");
 
     async function loadWorkspace() {
-      const { data, error: loadError } = await client
+      const { data, error: loadError } = await activeClient
         .from(TABLE)
         .select("data, updated_at")
         .eq("user_id", user!.id)
