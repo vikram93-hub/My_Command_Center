@@ -251,6 +251,7 @@ export default function CloudSyncGate({ children }: Props) {
       if (pendingSync.current) window.clearTimeout(pendingSync.current);
       setSyncStatus("Changes pending");
       pendingSync.current = window.setTimeout(() => {
+        pendingSync.current = null;
         void saveWorkspace(readLocalWorkspace());
       }, 800);
     };
