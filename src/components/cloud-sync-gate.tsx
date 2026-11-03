@@ -388,6 +388,7 @@ export default function CloudSyncGate({ children }: Props) {
         <button type="button" onClick={signOut} style={{ color: "#c4c4cc", background: "transparent", border: 0, cursor: "pointer", fontSize: 11 }}>Sign out</button>
       </div>
       {message && <div role="status" style={{ padding: 8, textAlign: "center", background: "#15342c", color: "#a7f3d0", fontSize: 12 }}>{message}</div>}
+      {error && <div role="alert" style={{ padding: 9, textAlign: "center", background: "#3b2025", color: "#fecaca", fontSize: 12 }}>{error}</div>}
       {children}
     </>
   );
