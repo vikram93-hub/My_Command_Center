@@ -212,6 +212,46 @@ function Dashboard() {
   const [editingRoadmapId, setEditingRoadmapId] = useState<string | null>(null);
   const [roadmapSearch, setRoadmapSearch] = useState("");
   const [expandedRoadmapId, setExpandedRoadmapId] = useState<string | null>(null);
+  
+  // Apply cloud changes to React state without a full-page reload.
+  useEffect(() => {
+    const applyCloudUpdate = () => {
+      try {
+        const read = <T,>(key: string): T | null => {
+          const raw = window.localStorage.getItem(key);
+          return raw ? JSON.parse(raw) as T : null;
+        };
+        const nextTasks = read<typeof initialTasks>("command-center-tasks");
+        const nextRoadmaps = read<Roadmap[]>("command-center-roadmaps");
+        const nextProjects = read<Project[]>("command-center-projects");
+        const nextClasses = read<ClassEntry[]>("command-center-weekly-classes");
+        const nextSemester = read<{ start?: string; end?: string }>("command-center-semester");
+        const nextHabits = read<Habit[]>("command-center-habits");
+        const nextFocus = read<{ date: string; sessions: number; minutes: number }>("command-center-focus-stats");
+        const nextSettings = read<{ dark?: boolean; displayName?: string; focusDuration?: number }>("command-center-settings");
+        if (nextTasks) setTasks(nextTasks);
+        if (nextRoadmaps) setRoadmaps(nextRoadmaps);
+        if (nextProjects) setProjects(nextProjects);
+        if (nextClasses) setClasses(nextClasses);
+        if (nextSemester) {
+          setSemesterStart(nextSemester.start ?? "");
+          setSemesterEnd(nextSemester.end ?? "");
+        }
+        if (nextHabits) setHabits(nextHabits);
+        if (nextFocus) setFocusStats(nextFocus);
+        if (nextSettings) {
+          if (typeof nextSettings.dark === "boolean") setDark(nextSettings.dark);
+          if (typeof nextSettings.displayName === "string") setDisplayName(nextSettings.displayName);
+          if ([25, 50, 90].includes(nextSettings.focusDuration ?? 0)) setFocusDuration(nextSettings.focusDuration!);
+        }
+      } catch (error) {
+        console.error("Could not apply cloud workspace update:", error);
+      }
+    };
+    window.addEventListener("command-center-cloud-update", applyCloudUpdate);
+    return () => window.removeEventListener("command-center-cloud-update", applyCloudUpdate);
+  }, []);
+
 
   useEffect(() => {
     try {
