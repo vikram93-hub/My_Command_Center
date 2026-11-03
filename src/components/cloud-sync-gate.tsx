@@ -279,7 +279,8 @@ export default function CloudSyncGate({ children }: Props) {
       suppressSync.current = true;
       writeLocalWorkspace((data.data ?? {}) as Record<string, unknown>);
       lastUpdated.current = data.updated_at;
-      window.location.reload();
+      window.dispatchEvent(new CustomEvent("command-center-cloud-update"));
+      window.setTimeout(() => { suppressSync.current = false; }, 700);
     }, 20000);
 
     return () => {
